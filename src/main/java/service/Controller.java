@@ -1,6 +1,5 @@
 package service;
 
-import com.google.gson.Gson;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,8 +15,7 @@ public class Controller {
 
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public String getUrl(@RequestParam(value="keywords") String keywords, @RequestParam(value="dateFrom", defaultValue = "none") String dateFrom, @RequestParam(value="dateTo", defaultValue = "none") String dateTo, @RequestParam(value="type", defaultValue = "keywords") String type) throws IOException {
-        Gson gson = new Gson();
+    public String getUrl(@RequestParam(value="keywords") String keywords, @RequestParam(value="datefrom", defaultValue = "none") String dateFrom, @RequestParam(value="dateto", defaultValue = "none") String dateTo, @RequestParam(value="type", defaultValue = "keywords") String type) throws IOException {
         keywords = java.net.URLDecoder.decode(keywords,"UTF-8");
         ArchiveQueryService service=new ArchiveQueryService();
         String response = service.getUrls(keywords, dateFrom, dateTo);

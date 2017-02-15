@@ -15,7 +15,7 @@ import org.apache.solr.common.SolrDocumentList;
 import structures.ArchiveUrl;
 import structures.ResponseWrapper;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ListIterator;
 
@@ -28,22 +28,30 @@ public class ArchiveQueryService {
     DateTimeFormatter formatter=  DateTimeFormatter.ISO_INSTANT;
 
     public String getUrls(String keywords,String dateFromRaw,String dateToRaw) {
-        LocalDate dateFrom;
-        LocalDate dateTo;
-
-        if(!dateFromRaw.equals("none"))
-             dateFrom = LocalDate.parse(dateFromRaw, formatter);
-        else
-            dateFrom = LocalDate.parse("2000-12-03T10:15:30Z", formatter);
-
-        if(!dateToRaw.equals("none"))
-            dateTo = LocalDate.parse(dateToRaw, formatter);
-        else {
-            LocalDate date = LocalDate.now();
-            String text = date.format(formatter);
-            dateTo = LocalDate.parse(text, formatter);
+        //DATE FORMATS ISO_INSTANT
+        ZonedDateTime dateFrom;
+        ZonedDateTime dateTo;
+        ZoneId zone= ZoneId.of("UTC");
+        //YY-MM-DD
+        if(!dateFromRaw.equals("none")) {
+            LocalDateTime temp = LocalDateTime.of(Integer.valueOf(dateFromRaw.split("-")[0]), Integer.valueOf(dateFromRaw.split("-")[1]), Integer.valueOf(dateFromRaw.split("-")[2]), 0, 0);
+            dateFrom=ZonedDateTime.of(temp,zone);
         }
-        String dateRange="["+dateFrom.toString()+" TO "+dateTo.toString()+"]";
+        else {
+            LocalDateTime temp = LocalDateTime.of(1999, Month.JANUARY, 1, 0, 0);
+            dateFrom=ZonedDateTime.of(temp,zone);
+        }
+        if(!dateToRaw.equals("none")) {
+            LocalDateTime temp = LocalDateTime.of(Integer.valueOf(dateToRaw.split("-")[0]), Integer.valueOf(dateToRaw.split("-")[1]), Integer.valueOf(dateToRaw.split("-")[2]), 0, 0);
+            dateTo=ZonedDateTime.of(temp,zone);
+        }
+        else {
+            LocalDateTime temp = LocalDateTime.now();
+            dateTo=ZonedDateTime.of(temp,zone);
+        }
+        String dateRange="["+dateFrom.format(formatter)+" TO "+dateTo.format(formatter)+"]";
+
+
         String query = getQuery(keywords,dateRange);
         SolrQuery solrQuery;
         solrQuery = new SolrQuery();
@@ -55,7 +63,7 @@ public class ArchiveQueryService {
         }
 
         solrQuery.setRows(15);
-        String urlString = "http://195.251.252.8:8983/solr/mail";
+        String urlString = "localhost:8983/solr/aueb";
         //SolrClient server = new HttpSolrClient.Builder(urlString).build();
         SolrClient server = new HttpSolrClient(urlString);
         QueryResponse response = null;
@@ -88,7 +96,7 @@ public class ArchiveQueryService {
 
     private static String getQuery(String keywords,String dateRange) {
         String query = "";
-
+        keywords.replaceAll(","," ");
         String query_0 = queryBuilder(keywords, "title");
 
         String query_1 = queryBuilder(keywords, "content");
