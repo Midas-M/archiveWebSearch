@@ -5,6 +5,7 @@
  */
 package service;
 
+import com.google.gson.Gson;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -12,10 +13,10 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import structures.ArchiveUrl;
+import structures.ResponseWrapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ListIterator;
 
 /**
@@ -24,22 +25,32 @@ import java.util.ListIterator;
  */
 public class ArchiveQueryService {
 
+    DateTimeFormatter formatter=  DateTimeFormatter.ISO_INSTANT;
 
+    public String getUrls(String keywords,String dateFromRaw,String dateToRaw) {
+        LocalDate dateFrom;
+        LocalDate dateTo;
 
-    public List<ArchiveUrl> getEmails() {
-        String query = getQuery(null);
+        if(!dateFromRaw.equals("none"))
+             dateFrom = LocalDate.parse(dateFromRaw, formatter);
+        else
+            dateFrom = LocalDate.parse("2000-12-03T10:15:30Z", formatter);
+
+        if(!dateToRaw.equals("none"))
+            dateTo = LocalDate.parse(dateToRaw, formatter);
+        else {
+            LocalDate date = LocalDate.now();
+            String text = date.format(formatter);
+            dateTo = LocalDate.parse(text, formatter);
+        }
+        String dateRange="["+dateFrom.toString()+" TO "+dateTo.toString()+"]";
+        String query = getQuery(keywords,dateRange);
         SolrQuery solrQuery;
         solrQuery = new SolrQuery();
-        if (query.startsWith(" AND")) {
-            query = query.substring(4);
-        }
-        if (query.startsWith("AND")) {
-            query = query.substring(3);
-        }
         solrQuery.setQuery(query);
         if (!query.equals("")) {
             solrQuery.setHighlight(true).setHighlightSnippets(1).setHighlightSimplePost("</strong>").setHighlightSimplePre("<strong>"); //set other params as needed
-            solrQuery.setParam("hl.fl", "content_t");
+            solrQuery.setParam("hl.fl", "content");
             solrQuery.setParam("hl.requireFieldMatch", "true");
         }
 
@@ -57,43 +68,37 @@ public class ArchiveQueryService {
         SolrDocumentList rs = response.getResults();
         long numFound = rs.getNumFound();
         int numResultsDisplay = (int) numFound;
-        ArrayList<ArchiveUrl> items = new ArrayList<ArchiveUrl>();
+        ResponseWrapper responseWrapper=new ResponseWrapper();
                 
         ListIterator<SolrDocument> iter = rs.listIterator();
 
         while (iter.hasNext()) {
             SolrDocument doc = iter.next();
-            String id = doc.get("messageId").toString();
-            String from = doc.get("from").toString();
-            String sentDate = doc.get("sentDate").toString();
-            String subject = doc.get("subject").toString();
+            String url = doc.get("url").toString();
+            String dateRaw = doc.get("date").toString();
+            LocalDate date = LocalDate.parse(dateRaw, formatter);
+            String title = doc.get("title").toString();
             String content = doc.get("content").toString();
-            
-            //items.add(new ArchiveUrl( id,  from,  sentDate,  subject,  content));
+            responseWrapper.add(new ArchiveUrl( url,  date,  title,  content));
         }
-        return items;
+        Gson gson = new Gson();
+        String APIresponse = gson.toJson(responseWrapper);
+        return APIresponse;
     }
 
-    private static String getQuery(Collection keywords) {
+    private static String getQuery(String keywords,String dateRange) {
         String query = "";
-        for (Object key : keywords) {
-            String s = key.toString();
-            query += s + " OR ";
-        }
-        String query_0 = queryBuilder(query, "content");
 
-        String query_1 = queryBuilder(query, "subject");
-        query = query_0 + " OR " + query_1;
+        String query_0 = queryBuilder(keywords, "title");
+
+        String query_1 = queryBuilder(keywords, "content");
+        query = query_0 + " OR (" + query_1+")^10"+" AND date:"+dateRange;
         return query;
     }
 
     private static String queryBuilder(String s, String field) {
-        String res = "";  
-        if (s.length() == 0) {
-            res = field + ":*";
-        } else {
-            res = field + ":" + "'" + s + "'";
-        }
+        String res = "";
+        res = field + ":" + "'" + s + "'~1000";
         return res;
 
     }
