@@ -1,0 +1,151 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Web Archive of Athens University of Economics and Business</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/animate.css">
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+        <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/script.js"></script>
+
+        <!--PAGINATION PLUGIN-->
+        <script src="js/jquery.bootpag.min.js"></script>
+
+        <!--LOADING PLUGIN-->
+        <script src="jquery-loading/jquery.loading.js"></script>
+        <link rel="stylesheet" href="jquery-loading/jquery.loading.css">
+
+
+        <!--DATEPICKER PLUGIN-->
+        <link href="bootstrap-datepicker-1.6.4-dist/css/bootstrap-datepicker3.min.css" rel="stylesheet">
+        <script src="bootstrap-datepicker-1.6.4-dist/js/bootstrap-datepicker.min.js"></script>
+        <script src="bootstrap-datepicker-1.6.4-dist/locales/bootstrap-datepicker.el.min.js"></script>
+        <script src="bootstrap-datepicker-1.6.4-dist/locales/bootstrap-datepicker.en-GB.min.js"></script>
+
+        <!--NOTIFY PLUGIN-->
+        <script src="bootstrap-notify-3.1.3/bootstrap-notify.min.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <!-- Optional theme -->
+        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">-->
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+                function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+                e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+                e.src='https://www.google-analytics.com/analytics.js';
+                r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+        </script>
+    </head>
+    <body>
+        <!--[if lt IE 8]><p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
+
+        <!-- Add your site or application content here -->
+        <h1 class="title">Web Archive of Athens University of Economics and Business</h1>
+
+        <div id="external-container">
+            <div id="custom-search-input" >
+                <div class="input-group col-md-12">
+                    <input type="text" name="searchInput" class="form-control input-lg" autofocus placeholder="Keywords" id="searchInput"/>
+                    <span class="input-group-btn">
+                            <button id="search-button" class="btn btn-info btn-lg" type="button">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4 col-md-4">
+                    <div id="buttons" class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary active" id="fullsearch-button" onclick="this.blur();">
+                            <input type="radio" name="options" id="fullseach-option" autocomplete="off"> Full Text Search
+                        </label>
+                        <label class="btn btn-default" id="urlsearch-button" onclick="this.blur();">
+                            <input type="radio" name="options" id="urlsearch-option" autocomplete="off"> By URL
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-8 col-md-8">
+                    <div class="input-daterange input-group" id="datepicker">
+                        <span class="input-group-addon">From Date</span>
+                        <input type="text" class="input-sm form-control" name="start" />
+                        <span class="input-group-addon">To Date</span>
+                        <input type="text" class="input-sm form-control" name="end" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+
+                <hgroup class="mb20">
+                    <h1>Search Results</h1>
+                    <h2 hidden class="lead"><strong id="number-results" class="text-danger"></strong> results were found for the keywords: <strong id="input-text" class="text-danger"></strong></h2>
+                </hgroup>
+
+                <div class="top-pagination">
+
+                </div>
+                <section id="results" class="col-xs-12 col-sm-6 col-md-12">
+                    <article id="no-results-article" class="search-result row demo">
+                        <h3>No results</h3>
+                        <h4>Enter Keywords or URL in the <a id="search-bar-link" href="#">Search Bar</a> above or press the button below for an example</h4>
+                        <button id="demo-button" type="button" class="btn btn-success">Demo</button>
+                    </article>
+                </section>
+                <div class="bottom-pagination">
+
+                </div>
+            </div>
+
+        </div>
+    </body>
+
+    <footer>
+        <div id="description">
+            <h3>About us</h3>
+            <blockquote>
+                <p>
+
+                    The Library of AUEB and DB-NET has initiated the archiving of AUEB websites since February 2010.
+                <p>
+                    The collection process is repeated approximately every month and gathers data from 78 different websites (in total approximately 500.000 Urls). This service offers the capability to:
+                </p>
+                browse and search the archived Web content. The users may perform keyword search in the archived content.
+                search for the different versions of a specific URL from the AUEB web sites.
+                <p>
+                    In both cases it is possible to restrict the search results within a specific time interval.
+
+                    AUEB Web Archive page is enlisted in the relevant Wikipedia page under the link <a href="/web/20160515185126/http://en.wikipedia.org/wiki/List_of_Web_archiving_initiatives" target="_blanck">"List of Web archiving initiatives"</a>.
+                </p>
+                For more information download the relevant published paper:
+                Vassilis Plachouras, Chrysostomos Kapetis, Michalis Vazirgiannis, <a href="/web/20160515185126/http://www.db-net.aueb.gr/files/ArchivingAUEB_CameraReady_V6.pdf" target="_blanck">"Archiving the Web sites of Athens University of Economics and Business"</a> , in the 19th Greek Academic Library Conference.
+                </p><p> A presentation about major archiving efforts worldwide and in Athens University of Economics Business can be found <a href="/web/20160515185126/http://archive.aueb.gr/Presentation.pdf">here</a></p>
+            </blockquote>
+        </div>
+
+        <div id="bottom">
+            <p>
+                <a href="http://www.espa.gr/"><img width="120" height="60" src="img/espa.jpg" /></a>
+                <a href="http://www.db-net.aueb.gr/"><img id="j_idt29" src="img/dbnet.jpeg" alt="" width="120" height="60" /></a>
+            </p>
+        </div>
+
+    </footer>
+</html>
