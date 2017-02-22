@@ -1,11 +1,17 @@
 package indexer;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,46 +22,41 @@ public class WarcIndexer {
 
 	public static void main(String[] args) {
 		// Get WARC files
-		List<Path> files = null;
+		List<File> files = null;
 		long startTime = System.currentTimeMillis();
 
-		try {
-			String warcFilePath = "warcs";
-			files = Files.walk(Paths.get(warcFilePath))
-					.filter(Files::isRegularFile)
-					.collect(Collectors.toList());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String warcFilePath = "/mnt/virtual_data/IMPORT_WARCS/";
+		// String warcFilePath = "/Users/antska/Git/archive_aueb/warcs";
+		File warcFile = new File(warcFilePath);
+		IOFileFilter suffixFileFilter = FileFilterUtils.suffixFileFilter ("warc.gz");
+		files = (List<File>) FileUtils.listFiles(warcFile, suffixFileFilter, TrueFileFilter.INSTANCE);
 
-		if (files != null) {
-			int totalWarcs = files.size();
-			System.out.println("total warcs " + totalWarcs);
-			int capacity = 200;
-			List<List<Path>> subsets = Lists.partition(files, capacity);
-			int counter = 1;
-			for (List<Path> partition : subsets) {
-				System.out.println("Getting partition " + counter + "/" + subsets.size());
-				long startPr = System.currentTimeMillis();
-				partition.parallelStream().forEach(f -> {
-					try {
-						if (f.toString().contains("WEB") && !f.toString().endsWith(".open")) {
-							WarcTools.extract(f);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
+		int totalWarcs = files.size();
+		System.out.println("total warcs " + totalWarcs);
+		int capacity = 200;
+		List<List<File>> subsets = Lists.partition(files, capacity);
+		int counter = 1;
+		for (List<File> partition : subsets) {
+			System.out.println("Getting partition " + counter + "/" + subsets.size());
+			long startPr = System.currentTimeMillis();
+			partition.parallelStream().forEach(f -> {
+				try {
+					if (f.toString().contains("WEB") && !f.toString().endsWith(".open")) {
+						WarcTools.extract(f);
 					}
-				});
-				counter++;
-				long endPr = System.currentTimeMillis();
-				long elapsedPr = endPr - startPr;
-				System.out.println("Time elapsed for partition: " + elapsedPr / 1000 + "sec (" +
-						(elapsedPr / 1000) / 60.0 + "min)");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+			counter++;
+			long endPr = System.currentTimeMillis();
+			long elapsedPr = endPr - startPr;
+			System.out.println("Time elapsed for partition: " + elapsedPr / 1000 + "sec (" +
+					(elapsedPr / 1000) / 60.0 + "min)");
 
-			}
-			long stopTime = System.currentTimeMillis();
-			long elapsedTime = stopTime - startTime;
-			System.out.println("Total time: " + elapsedTime / 1000 + "sec | " + (elapsedTime / 1000) / 60.0 + "min");
 		}
+		long stopTime = System.currentTimeMillis();
+		long elapsedTime = stopTime - startTime;
+		System.out.println("Total time: " + elapsedTime / 1000 + "sec | " + (elapsedTime / 1000) / 60.0 + "min");
 	}
 }

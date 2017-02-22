@@ -23,14 +23,14 @@ import java.util.Set;
  * @author antska
  */
 public class WarcTools {
-	private static String urlString = "http://localhost:8983/solr/aueb/";
+	private static String urlString = "http://localhost:8983/solr/aueb_archive";
 	private static SolrClient solr = new HttpSolrClient.Builder(urlString).build();
 
 	private static Set<String> STANDARD_ENCODINGS = new HashSet<>(Arrays.asList(new String[]{"UTF-8", "ISO-8859-7",
 			"WINDOWS-1253", "ISO-8859-1", "ISO-8859-2", "UTF-16", "WINDOWS-1252", "UTF-32", "CP1252", "CP1253"}));
 
-	public static boolean extract(Path f) throws IOException {
-		File file = f.toFile();
+	public static boolean extract(File file) throws IOException {
+		// File file = f.toFile();
 		InputStream in = new FileInputStream(file);
 		WarcReader reader = WarcReaderFactory.getReader(in);
 		WarcRecord record;
@@ -51,20 +51,19 @@ public class WarcTools {
 					} else {
 						encoding = "";
 					}
-					String cleanDomain = getDomainName(record.getHeader("WARC-Target-URI").value);
+					// String cleanDomain = getDomainName(record.getHeader("WARC-Target-URI").value);
 					String[] contents = getContent(record.getPayloadContent(), encoding, url);
 
-					if (cleanDomain != null) {
-						SolrInputDocument document = new SolrInputDocument();
-						document.addField("url", cleanDomain);
-						document.addField("date", date);
-						document.addField("title", contents[0]);
-						document.addField("content", contents[1]);
+					SolrInputDocument document = new SolrInputDocument();
+					document.addField("id", date+"*"+url);
+					document.addField("url_s", url);
+					document.addField("date_d", date);
+					document.addField("title_t", contents[0]);
+					document.addField("content_t", contents[1]);
 
-						UpdateResponse response = solr.add(document);
+					UpdateResponse response = solr.add(document);
 
-						solr.commit();
-					}
+					solr.commit();
 				}
 			}
 			return true;
