@@ -1,5 +1,6 @@
 package service;
 
+import indexer.WarcIndexer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +21,11 @@ public class Controller {
         ArchiveQueryService service=new ArchiveQueryService();
         String response = service.getUrls(keywords, dateFrom, dateTo);
         return response;
+    }
+
+    @RequestMapping(value = "/indexing", method = RequestMethod.GET)
+    public void warcIndexing(){
+        WarcIndexer indexer = new WarcIndexer();
     }
 
 

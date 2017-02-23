@@ -8,12 +8,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author antska
@@ -33,7 +28,7 @@ public class WarcIndexer {
 
 		int totalWarcs = files.size();
 		System.out.println("total warcs " + totalWarcs);
-		int capacity = 200;
+		int capacity = 50;
 		List<List<File>> subsets = Lists.partition(files, capacity);
 		int counter = 1;
 		for (List<File> partition : subsets) {
@@ -41,9 +36,7 @@ public class WarcIndexer {
 			long startPr = System.currentTimeMillis();
 			partition.parallelStream().forEach(f -> {
 				try {
-					if (f.toString().contains("WEB") && !f.toString().endsWith(".open")) {
-						WarcTools.extract(f);
-					}
+					WarcTools.extract(f);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

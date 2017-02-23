@@ -12,11 +12,15 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.tomcat.jni.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 import structures.ArchiveUrl;
 import structures.ResponseWrapper;
 
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.ListIterator;
 
 /**
@@ -63,9 +67,9 @@ public class ArchiveQueryService {
         }
 
         solrQuery.setRows(15);
-        String urlString = "localhost:8983/solr/aueb";
-        //SolrClient server = new HttpSolrClient.Builder(urlString).build();
-        SolrClient server = new HttpSolrClient(urlString);
+        String urlString = "http://localhost:8983/solr/aueb_archive";
+        SolrClient server = new HttpSolrClient.Builder(urlString).build();
+        //SolrClient server = new HttpSolrClient(urlString);
         QueryResponse response = null;
         try {
             response = server.query(solrQuery);
@@ -82,11 +86,13 @@ public class ArchiveQueryService {
 
         while (iter.hasNext()) {
             SolrDocument doc = iter.next();
-            String url = doc.get("url").toString();
-            String dateRaw = doc.get("date").toString();
-            LocalDate date = LocalDate.parse(dateRaw, formatter);
-            String title = doc.get("title").toString();
-            String content = doc.get("content").toString();
+            String url = doc.get("url_s").toString();
+            //String dateRaw = doc.get("date_dt").toString();
+            Date dDate = (Date) doc.get("date_dt");
+            String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(dDate);
+            //LocalDate date = LocalDate.parse(dateRaw);
+            String title = doc.get("title_t").toString();
+            String content = doc.get("content_t").toString();
             responseWrapper.add(new ArchiveUrl( url,  date,  title,  content));
         }
         Gson gson = new Gson();
@@ -97,10 +103,10 @@ public class ArchiveQueryService {
     private static String getQuery(String keywords,String dateRange) {
         String query = "";
         keywords.replaceAll(","," ");
-        String query_0 = queryBuilder(keywords, "title");
+        String query_0 = queryBuilder(keywords, "title_t");
 
-        String query_1 = queryBuilder(keywords, "content");
-        query = query_0 + " OR (" + query_1+")^10"+" AND date:"+dateRange;
+        String query_1 = queryBuilder(keywords, "content_t");
+        query = query_0 + " OR (" + query_1+")^10"+" AND date_dt:"+dateRange;
         return query;
     }
 

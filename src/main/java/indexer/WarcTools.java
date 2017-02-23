@@ -14,7 +14,6 @@ import org.jwat.warc.WarcRecord;
 
 import java.io.*;
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,11 +52,11 @@ public class WarcTools {
 					}
 					// String cleanDomain = getDomainName(record.getHeader("WARC-Target-URI").value);
 					String[] contents = getContent(record.getPayloadContent(), encoding, url);
-
 					SolrInputDocument document = new SolrInputDocument();
 					document.addField("id", date+"*"+url);
 					document.addField("url_s", url);
-					document.addField("date_d", date);
+
+					document.addField("date_dt", date);
 					document.addField("title_t", contents[0]);
 					document.addField("content_t", contents[1]);
 
@@ -137,7 +136,7 @@ public class WarcTools {
 			if (STANDARD_ENCODINGS.contains(cleanEnc)) {
 				String html_text = new String(byteArray, cleanEnc);
 				title = Jsoup.parse(html_text).head().select("title").text();
-				body = Jsoup.parse(html_text).body().text().replaceAll("\\P{L}", " ");
+				body = Jsoup.parse(html_text).body().text().replaceAll("\\P{L}", " ").replaceAll("\\s+", " ");
 			} else {
 				body = "";
 				title = "";

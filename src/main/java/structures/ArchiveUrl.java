@@ -7,11 +7,11 @@ import java.time.LocalDate;
  */
 public class ArchiveUrl {
     private String url;
-    private LocalDate date;
+    private String date;
     private String title;
     private String content;
 
-    public ArchiveUrl(String url, LocalDate date, String title, String content) {
+    public ArchiveUrl(String url, String date, String title, String content) {
         this.url = url;
         this.date = date;
         this.title = title;
@@ -26,11 +26,11 @@ public class ArchiveUrl {
         this.url = url;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

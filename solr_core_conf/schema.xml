@@ -138,7 +138,7 @@
    <field name="url_s" type="string" indexed="true" stored="true"/>
    <field name="title_t" type="text_general" indexed="true" stored="true"/>
    <field name="content_t" type="text_general" indexed="true" stored="true"/>
-   <field name="date_d" type="date" indexed="true" stored="true"/>
+   <field name="date_dt" type="tdate" indexed="true" stored="true"/>
 
   
    <!-- Main body of document extracted by SolrCell.
