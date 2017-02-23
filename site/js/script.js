@@ -1,8 +1,8 @@
 /**
- * Created by antska on 15/02/2017.
+ * @author antska
  */
 
-var url = 'http://localhost:8080/search';
+var url = 'http://83.212.204.92:8080/search';
 
 $(document).ready(function () {
 
@@ -29,7 +29,8 @@ $(document).ready(function () {
         language: "el",
         autoclose: true,
         format: "yyyy-mm-dd",
-        todayHighlight: true
+        todayHighlight: true,
+        todayBtn: true
     });
 
     $('#search-bar-link').on('click', function () {
@@ -88,42 +89,43 @@ $(document).ready(function () {
                 if (datefrom == '' || dateto == '') {
                     $.get(url, {keywords: keywords}, function (data) {
                         alert(data);
+                        createResults(data);
                     });
                 }
                 else {
                     $.get(url, {keywords: keywords, datefrom: datefrom, dateto: dateto}, function (data) {
-                        alert(data);
+                        //alert(data);
+                        $('.lead').show();
+                        $('#input-text').text(keywords);
+
+                        createResults(data);
+                        pagesCount = $(".search-result.row.normal").length;
+                        $('#number-results').text(pagesCount);
+                        var totalPages = Math.ceil(pagesCount / pageSize);
+                        $('.top-pagination,.bottom-pagination').bootpag({
+                            total: totalPages,
+                            page: 1,
+                            maxVisible: 5,
+                            leaps: true,
+                            firstLastUse: true,
+                            first: '←',
+                            last: '→',
+                            wrapClass: 'pagination',
+                            activeClass: 'active',
+                            disabledClass: 'disabled',
+                            nextClass: 'next',
+                            prevClass: 'prev',
+                            lastClass: 'last',
+                            firstClass: 'first'
+                        }).on("page", function(event, num){
+                            $(".search-result.row.normal").hide().each(function(n) {
+                                if (n >= pageSize * (num - 1) && n < pageSize * num)
+                                    $(this).show();
+                            });
+                        });
+                        $('#results').loading('stop');
                     });
                 }
-                $('.lead').show();
-                $('#input-text').text(keywords);
-
-                createResults([1, 2, 3, 4, 5, 6, 7, 8, 9, 10 , 11]);
-                pagesCount = $(".search-result.row.normal").length;
-                $('#number-results').text(pagesCount);
-                var totalPages = Math.ceil(pagesCount / pageSize);
-                $('.top-pagination,.bottom-pagination').bootpag({
-                    total: totalPages,
-                    page: 1,
-                    maxVisible: 5,
-                    leaps: true,
-                    firstLastUse: true,
-                    first: '←',
-                    last: '→',
-                    wrapClass: 'pagination',
-                    activeClass: 'active',
-                    disabledClass: 'disabled',
-                    nextClass: 'next',
-                    prevClass: 'prev',
-                    lastClass: 'last',
-                    firstClass: 'first'
-                }).on("page", function(event, num){
-                    $(".search-result.row.normal").hide().each(function(n) {
-                        if (n >= pageSize * (num - 1) && n < pageSize * num)
-                            $(this).show();
-                    });
-                });
-                $('#results').loading('stop');
             }
         } else if ($('#urlsearch-button').hasClass('active')) {
             var url_input = searchValue.trim();
@@ -162,16 +164,22 @@ function getData(data) {
 }
 
 function createResults(data) {
-    for (var i = 0; i < data.length; i++) {
+    var jsonObject = JSON.parse(data);
+    for (var i = 0; i < jsonObject.items.length; i++) {
+        var date = jsonObject.items[i].date.toString();
+        var url = jsonObject.items[i].url.toString();
+        var title = jsonObject.items[i].title.toString();
+        var content = jsonObject.items[i].content.toString();
+
         $('#results').append('<article class="search-result row normal">' +
             '<div class="col-xs-12 col-sm-12 col-md-2">' +
             '<ul class="meta-search">' +
-            '<li><i class="glyphicon glyphicon-calendar"></i><span>02/15/2014</span></li>' +
+            '<li><i class="glyphicon glyphicon-calendar"></i><span>'+date.split('T')[0]+'</span></li>' +
             '</ul>' +
             '</div>' +
             '<div class="col-xs-12 col-sm-12 col-md-7 excerpet">' +
-            '<h3><a href="#" title="">TITLE</a></h3>' +
-            '<p>Short Description</p>' +
+            '<h3><a href='+url+' title="">'+title+'</a></h3>' +
+            '<p>'+content.substring(0,200)+'...</p>' +
             '<span class="plus"><a href="#" title="More"><i class="glyphicon glyphicon-plus"></i></a></span>' +
             '</div>' +
             '<span class="clearfix borda"></span>' +
