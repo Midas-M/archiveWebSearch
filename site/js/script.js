@@ -41,8 +41,8 @@ $(document).ready(function () {
     $('#demo-button').on('click', function () {
         $(this).blur();
         if ($('#fullsearch-button').hasClass('active')) {
-            $('#searchInput').val('computer science');
-            $('input[name=start]').val('2016-01-25');
+            $('#searchInput').val('eclass');
+            $('input[name=start]').val('2011-01-25');
             $('input[name=end]').val('2017-02-25');
         } else if ($('#urlsearch-button').hasClass('active')) {
             $('#searchInput').val('http://www.aueb.gr/');
@@ -61,6 +61,8 @@ $(document).ready(function () {
         var searchValue = $('input[name=searchInput]').val();
         var datefrom = $('input[name=start]').val();
         var dateto = $('input[name=end]').val();
+
+        $('.search-result').remove();
 
         if ($('#fullsearch-button').hasClass('active')) {
             var keywords = searchValue.replace(' ', ',');
@@ -94,7 +96,7 @@ $(document).ready(function () {
                 }
                 else {
                     $.get(url, {keywords: keywords, datefrom: datefrom, dateto: dateto}, function (data) {
-                        //alert(data);
+
                         $('.lead').show();
                         $('#input-text').text(keywords);
 
@@ -171,7 +173,7 @@ function createResults(data) {
         var title = jsonObject.items[i].title.toString();
         var content = jsonObject.items[i].content.toString();
 
-        $('#results').append('<article class="search-result row normal">' +
+        $('#results').append('<article id="result-article" class="search-result row normal">' +
             '<div class="col-xs-12 col-sm-12 col-md-2">' +
             '<ul class="meta-search">' +
             '<li><i class="glyphicon glyphicon-calendar"></i><span>'+date.split('T')[0]+'</span></li>' +
