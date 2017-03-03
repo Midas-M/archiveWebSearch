@@ -1,10 +1,7 @@
 package service;
 
 import indexer.WarcIndexer;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,7 +11,7 @@ public class Controller {
     private final AtomicLong counter = new AtomicLong();
 
 
-
+    @CrossOrigin(origins = "*")
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     public String getUrl(@RequestParam(value="keywords") String keywords, @RequestParam(value="datefrom", defaultValue = "none") String dateFrom, @RequestParam(value="dateto", defaultValue = "none") String dateTo, @RequestParam(value="type", defaultValue = "keywords") String type) throws IOException {
         keywords = java.net.URLDecoder.decode(keywords,"UTF-8");
