@@ -119,8 +119,8 @@ $(document).ready(function () {
                             prevClass: 'prev',
                             lastClass: 'last',
                             firstClass: 'first'
-                        }).on("page", function(event, num){
-                            $(".search-result.row.normal").hide().each(function(n) {
+                        }).on("page", function (event, num) {
+                            $(".search-result.row.normal").hide().each(function (n) {
                                 if (n >= pageSize * (num - 1) && n < pageSize * num)
                                     $(this).show();
                             });
@@ -172,16 +172,17 @@ function createResults(data) {
         var url = jsonObject.items[i].url.toString();
         var title = jsonObject.items[i].title.toString();
         var content = jsonObject.items[i].content.toString();
+        var wayback = 'http://83.212.204.92:9090/' + date.split('T')[0].replace(/-/g, '') + date.split('T')[1].replace(/:/g, '').slice(0,-1) + '/';
 
         $('#results').append('<article id="result-article" class="search-result row normal">' +
             '<div class="col-xs-12 col-sm-12 col-md-2">' +
             '<ul class="meta-search">' +
-            '<li><i class="glyphicon glyphicon-calendar"></i><span>'+date.split('T')[0]+'</span></li>' +
+            '<li><i class="glyphicon glyphicon-calendar"></i><span>' + date.split('T')[0] + '</span></li>' +
             '</ul>' +
             '</div>' +
             '<div class="col-xs-12 col-sm-12 col-md-7 excerpet">' +
-            '<h3><a href='+url+' title="">'+title+'</a></h3>' +
-            '<p>'+content.substring(0,200)+'...</p>' +
+            '<h3><a href=' + wayback + url + ' title="">' + title + '</a></h3>' +
+            '<p>' + content.substring(0, 200) + '...</p>' +
             '<span class="plus"><a href="#" title="More"><i class="glyphicon glyphicon-plus"></i></a></span>' +
             '</div>' +
             '<span class="clearfix borda"></span>' +
@@ -190,7 +191,7 @@ function createResults(data) {
 
     $('#results').find('article').last().append('<span class="clearfix border"></span>')
 
-    $(".search-result.row.normal").hide().each(function(n) {
+    $(".search-result.row.normal").hide().each(function (n) {
         if (n < 5)
             $(this).show();
     });
