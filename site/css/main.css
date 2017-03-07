@@ -104,6 +104,15 @@ body, footer {
     color: maroon;
 }
 
+.title a{
+    color: maroon;
+}
+
+.title a:hover, .title a:focus {
+    text-decoration: none;
+    color: maroon;
+}
+
 #external-container {
     margin: 50px 200px auto;
 }
@@ -142,7 +151,6 @@ body, footer {
 #custom-search-input .glyphicon-search {
     font-size: 23px;
 }
-
 
 #buttons {
     margin: 10px auto;
@@ -240,7 +248,7 @@ hgroup h2.lead {
 
 .search-result span.plus {
     position: absolute;
-    right: 0;
+    left: 15px;
     /*top: 126px;*/
 }
 
@@ -264,11 +272,11 @@ hgroup h2.lead {
     border-bottom: 1px dotted #ccc;
 }
 
-#no-results-article h3{
+#no-results-article h3 {
     color: maroon;
 }
 
-#no-results-article h4{
+#no-results-article h4 {
     color: silver;
 }
 
@@ -291,6 +299,30 @@ hgroup h2.lead {
 
 .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
     outline: 0 !important;
+}
+
+.btn.btn-default.active {
+    color: #248dc1;
+}
+
+.btn.btn-default.active:active, .btn.btn-default.active:focus {
+    color: #248dc1;
+}
+
+.date-link-more {
+    color: grey;
+}
+
+.date-link-more:hover, .date-link-more:focus {
+    text-decoration: none;
+}
+
+.date-link:hover, .date-link:focus {
+    text-decoration: none;
+}
+
+.search-result ul li.active {
+    background-color: #b3d4fc;
 }
 
 /* ==========================================================================

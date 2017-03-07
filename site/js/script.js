@@ -2,7 +2,11 @@
  * @author antska
  */
 
-var url = 'http://83.212.204.92:8080/search';
+var api_url = 'http://83.212.204.92:8080/archive-1.0-SNAPSHOT/search';
+// var api_url = 'http://83.212.204.92:8080/search';
+var wayback_url = 'http://83.212.204.92:8080/wayback/';
+var groupedData_mapped;
+var groupedData_keys = {};
 
 $(document).ready(function () {
 
@@ -11,6 +15,7 @@ $(document).ready(function () {
     currentPage = 1;
     totalPages = 0;
 
+    // onClick event: url search button
     $('#urlsearch-button').on('click', function () {
         $('#fullsearch-button').attr('class', 'btn btn-default');
         $('#urlsearch-button').attr('class', 'btn btn-primary');
@@ -18,6 +23,8 @@ $(document).ready(function () {
         $('#searchInput').attr('placeholder', 'URL')
 
     });
+
+    // onClick event: full search button
     $('#fullsearch-button').on('click', function () {
         $('#urlsearch-button').attr('class', 'btn btn-default');
         $('#fullsearch-button').attr('class', 'btn btn-primary');
@@ -25,6 +32,7 @@ $(document).ready(function () {
         $('#searchInput').attr('placeholder', 'Keywords')
     });
 
+    // Initialize datepicker
     $('#external-container').find('.input-daterange').datepicker({
         language: "el",
         autoclose: true,
@@ -33,11 +41,13 @@ $(document).ready(function () {
         todayBtn: true
     });
 
+    // onClick event: search link clicked -> focus on the search bar
     $('#search-bar-link').on('click', function () {
         $('#custom-search-input').focus();
         $('#searchInput').focus();
     });
 
+    // onClick event: demo button
     $('#demo-button').on('click', function () {
         $(this).blur();
         if ($('#fullsearch-button').hasClass('active')) {
@@ -46,18 +56,51 @@ $(document).ready(function () {
             $('input[name=end]').val('2017-02-25');
         } else if ($('#urlsearch-button').hasClass('active')) {
             $('#searchInput').val('http://www.aueb.gr/');
-            $('input[name=start]').val('2016-01-25');
+            $('input[name=start]').val('2011-01-25');
             $('input[name=end]').val('2017-02-25');
         }
     });
 
+    // Keypress event: press Enter on search bar
     $('#searchInput').keypress(function (event) {
         if (event.keyCode == 13 || event.which == 13) {
             $('#search-button').click();
         }
     });
 
-    $('#search-button').click(function () {
+    // onClick event: more/less button
+    $(document).on('click', '.plus a', function (sender) {
+        var id = sender.currentTarget.parentNode.parentNode.parentNode.id;
+        if (sender.currentTarget.lastElementChild.className.includes('glyphicon-plus')) {
+            $('#' + id + ' .btn-group-vertical > button').removeClass('hide');
+            $('#' + id + ' .excerpet > .plus > a > i').removeClass('glyphicon-plus');
+            $('#' + id + ' .excerpet .plus > a > i').addClass('glyphicon-minus');
+            $('#' + id + ' .excerpet .plus').get(0).lastChild.nodeValue = " Latest Edition";
+        } else if (sender.currentTarget.lastElementChild.className.includes('glyphicon-minus')) {
+            $('#' + id + ' .btn-group-vertical > button').addClass('hide');
+            $('#' + id + ' .btn-group-vertical > button.latest').removeClass('hide');
+            $('#' + id + ' .excerpet > .plus > a > i').removeClass('glyphicon-minus');
+            $('#' + id + ' .excerpet .plus > a > i').addClass('glyphicon-plus');
+            $('#' + id + ' .excerpet .plus').get(0).lastChild.nodeValue = " Previous Editions";
+        }
+    });
+
+    // onClick event: date choose
+    $(document).on('click', '.btn-group-vertical > button', function (sender) {
+        var id = sender.currentTarget.parentNode.parentNode.parentNode.id;
+        $('#' + id + ' button.btn.btn-default.active.latest').removeClass('active');
+        $('#' + id + ' button.btn.btn-default.active.more').removeClass('active');
+        $(sender.currentTarget).addClass('active');
+        var sender_date = sender.currentTarget.textContent.trim();
+        $('#' + id + ' > div > h3').get(0).lastChild.lastChild.nodeValue = groupedData_mapped[groupedData_keys[id]][sender_date].title;
+        $('#' + id + ' > div > p').empty();
+        $('#' + id + ' > div > p').append(groupedData_mapped[groupedData_keys[id]][sender_date].content.substring(0, 200) + '...');
+        $('#' + id + ' > div > h3 a').get(0).href = groupedData_mapped[groupedData_keys[id]][sender_date].wayback_url;
+        $('#' + id + ' > div > h3 a').get(0).title = groupedData_mapped[groupedData_keys[id]][sender_date].title;
+    });
+
+    // onClick event: Search button
+    $('#search-button').on('click', function () {
         var searchValue = $('input[name=searchInput]').val();
         var datefrom = $('input[name=start]').val();
         var dateto = $('input[name=end]').val();
@@ -89,13 +132,38 @@ $(document).ready(function () {
                 $('#results').loading({start: true, theme: 'transparent'});
 
                 if (datefrom == '' || dateto == '') {
-                    $.get(url, {keywords: keywords}, function (data) {
-                        alert(data);
+                    $.get(api_url, {keywords: keywords}, function (data) {
                         createResults(data);
+
+                        pagesCount = $(".search-result.row.normal").length;
+                        $('#number-results').text(pagesCount);
+                        var totalPages = Math.ceil(pagesCount / pageSize);
+                        $('.top-pagination,.bottom-pagination').bootpag({
+                            total: totalPages,
+                            page: 1,
+                            maxVisible: 5,
+                            leaps: true,
+                            firstLastUse: true,
+                            first: '←',
+                            last: '→',
+                            wrapClass: 'pagination',
+                            activeClass: 'active',
+                            disabledClass: 'disabled',
+                            nextClass: 'next',
+                            prevClass: 'prev',
+                            lastClass: 'last',
+                            firstClass: 'first'
+                        }).on("page", function (event, num) {
+                            $(".search-result.row.normal").hide().each(function (n) {
+                                if (n >= pageSize * (num - 1) && n < pageSize * num)
+                                    $(this).show();
+                            });
+                        });
+                        $('#results').loading('stop');
                     });
                 }
                 else {
-                    $.get(url, {keywords: keywords, datefrom: datefrom, dateto: dateto}, function (data) {
+                    $.get(api_url, {keywords: keywords, datefrom: datefrom, dateto: dateto}, function (data) {
 
                         $('.lead').show();
                         $('#input-text').text(keywords);
@@ -152,44 +220,116 @@ $(document).ready(function () {
             } else {
                 $('.search-result.row.demo').hide();
                 $('#results').loading();
-                //    code for opening WAYBACK (API)
+                $.get(api_url, {url: url_input, datefrom: datefrom, dateto: dateto}, function (data) {
+                    createResults(data);
+                    $('.plus a').click();
+                    pagesCount = $(".search-result.row.normal").length;
+                    $('#number-results').text(pagesCount);
+                    var totalPages = Math.ceil(pagesCount / pageSize);
+                    $('.top-pagination,.bottom-pagination').bootpag({
+                        total: totalPages,
+                        page: 1,
+                        maxVisible: 5,
+                        leaps: true,
+                        firstLastUse: true,
+                        first: '←',
+                        last: '→',
+                        wrapClass: 'pagination',
+                        activeClass: 'active',
+                        disabledClass: 'disabled',
+                        nextClass: 'next',
+                        prevClass: 'prev',
+                        lastClass: 'last',
+                        firstClass: 'first'
+                    }).on("page", function (event, num) {
+                        $(".search-result.row.normal").hide().each(function (n) {
+                            if (n >= pageSize * (num - 1) && n < pageSize * num)
+                                $(this).show();
+                        });
+                    });
+                });
+                $('#results').loading('stop');
             }
         }
     });
 });
 
-function getData(data) {
-    // parse JSON data
-    // loop through data
-    // add elements to id='results'
-    // ....
-}
 
 function createResults(data) {
     var jsonObject = JSON.parse(data);
-    for (var i = 0; i < jsonObject.items.length; i++) {
-        var date = jsonObject.items[i].date.toString();
-        var url = jsonObject.items[i].url.toString();
-        var title = jsonObject.items[i].title.toString();
-        var content = jsonObject.items[i].content.toString();
-        var wayback = 'http://83.212.204.92:9090/' + date.split('T')[0].replace(/-/g, '') + date.split('T')[1].replace(/:/g, '').slice(0,-1) + '/';
+    // var jsonObject_temp = JSON.parse(JSON.stringify(jsonObject));
+    var obj = {};
+    obj.items = [];
+    for (var j = 0; j < jsonObject.items.length; j++) {
+        obj.items.push(jsonObject.items[j]);
+        // testing...
+        // jsonObject_temp.items[j].date = '2011-11-01T19:16:11Z';
+        // jsonObject_temp.items[j].title = 'Sample Title';
+        // jsonObject_temp.items[j].content = 'Sample Content Sample Content Sample Content Sample Content Sample Content ';
+        // obj.items.push(jsonObject_temp.items[j]);
+    }
+    var groupedData = _.groupBy(obj.items, function (d) {
+        return d.url;
+    });
+    groupedData_mapped = _.object(_.map(groupedData, function (group, uri) {
+        var temp_j = {};
+        group = group.sort();
+        for (var g in group) {
+            temp_j[group[g].date.split('T')[0]] = group[g];
+        }
+        return [uri, temp_j];
+    }));
+    var id = 0;
+    for (var uri in groupedData_mapped) {
+        var uri_id = "uri_" + id;
+        groupedData_keys[uri_id] = uri;
+        var dates = [];
+        if (groupedData_mapped.hasOwnProperty(uri)) {
 
-        $('#results').append('<article id="result-article" class="search-result row normal">' +
-            '<div class="col-xs-12 col-sm-12 col-md-2">' +
-            '<ul class="meta-search">' +
-            '<li><i class="glyphicon glyphicon-calendar"></i><span>' + date.split('T')[0] + '</span></li>' +
-            '</ul>' +
-            '</div>' +
-            '<div class="col-xs-12 col-sm-12 col-md-7 excerpet">' +
-            '<h3><a href=' + wayback + url + ' title="">' + title + '</a></h3>' +
-            '<p>' + content.substring(0, 200) + '...</p>' +
-            '<span class="plus"><a href="#" title="More"><i class="glyphicon glyphicon-plus"></i></a></span>' +
-            '</div>' +
-            '<span class="clearfix borda"></span>' +
-            '</article>')
+            var first_d_id = Object.keys(groupedData_mapped[uri])[0];
+            var url = groupedData_mapped[uri][first_d_id].url.toString();
+            var title = groupedData_mapped[uri][first_d_id].title.toString();
+            var content = groupedData_mapped[uri][first_d_id].content.toString();
+
+            for (var d_id in groupedData_mapped[uri]) {
+                if (groupedData_mapped[uri].hasOwnProperty(d_id)) {
+                    var date = groupedData_mapped[uri][d_id].date.toString();
+                    dates.push(date);
+                    var wayback = wayback_url + date.split('T')[0].replace(/-/g, '') + date.split('T')[1].replace(/:/g, '').slice(0, -1) + '/';
+                    groupedData_mapped[uri][d_id].wayback_url = wayback + url;
+                }
+            }
+            date = groupedData_mapped[uri][first_d_id].date.toString();
+            wayback = wayback_url + date.split('T')[0].replace(/-/g, '') + date.split('T')[1].replace(/:/g, '').slice(0, -1) + '/';
+
+
+            $('#results').append('<article id="' + uri_id + '" class="search-result row normal">' +
+                '<div class="col-xs-12 col-sm-12 col-md-2">' +
+                '<div class="btn-group-vertical" role="group">' +
+                '<button type="button" class="btn btn-default active latest">' +
+                '<i class="glyphicon glyphicon-calendar"></i> ' + dates[0].split('T')[0] +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '<div class="col-xs-12 col-sm-12 col-md-7 excerpet">' +
+                '<h3><a href=' + wayback + url + ' title="' + title + '" target="_blank">' + title + '</a></h3>' +
+                '<p>' + content.substring(0, 200) + '...</p>' +
+                '</article>');
+            if (dates.length > 1) {
+                $('#' + uri_id + ' .excerpet').append('<span class="plus"><a href="javascript:void(0)" title="More"><i class="glyphicon glyphicon-plus"></i></a> Previous Editions</span>');
+            }
+            $('#' + uri_id).append('<span class="clearfix borda"></span>');
+
+            for (var d = 1; d < dates.length; d++) {
+                $('#' + uri_id + ' .btn-group-vertical').append('<button type="button" class="btn btn-default more hide">' +
+                    '<i class="glyphicon glyphicon-calendar"></i> ' + dates[d].split('T')[0] +
+                    '</button>');
+            }
+        }
+        id++;
     }
 
-    $('#results').find('article').last().append('<span class="clearfix border"></span>')
+    $('#results').find('article').last().append('<span class="clearfix border"></span>');
 
     $(".search-result.row.normal").hide().each(function (n) {
         if (n < 5)
