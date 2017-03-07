@@ -12,8 +12,6 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.tomcat.jni.Local;
-import org.springframework.format.annotation.DateTimeFormat;
 import structures.ArchiveUrl;
 import structures.ResponseWrapper;
 
@@ -31,7 +29,7 @@ public class ArchiveQueryService {
 
     DateTimeFormatter formatter=  DateTimeFormatter.ISO_INSTANT;
 
-    public String getUrls(String keywords,String dateFromRaw,String dateToRaw) {
+    public String getUrls(String input,String dateFromRaw,String dateToRaw) {
         //DATE FORMATS ISO_INSTANT
         ZonedDateTime dateFrom;
         ZonedDateTime dateTo;
@@ -55,21 +53,26 @@ public class ArchiveQueryService {
         }
         String dateRange="["+dateFrom.format(formatter)+" TO "+dateTo.format(formatter)+"]";
 
-
-        String query = getQuery(keywords,dateRange);
         SolrQuery solrQuery;
         solrQuery = new SolrQuery();
-        solrQuery.setQuery(query);
-        if (!query.equals("")) {
-            solrQuery.setHighlight(true).setHighlightSnippets(1).setHighlightSimplePost("</strong>").setHighlightSimplePre("<strong>"); //set other params as needed
-            solrQuery.setParam("hl.fl", "content");
-            solrQuery.setParam("hl.requireFieldMatch", "true");
+
+        String query;
+        if (input.contains("http") || input.contains("www")){
+            query = getUrlQuery(input, dateRange);
+        }else{
+            query = getQuery(input,dateRange);
+            if (!query.equals("")) {
+                solrQuery.setHighlight(true).setHighlightSnippets(1).setHighlightSimplePost("</mark></strong>").setHighlightSimplePre("<strong><mark>"); //set other params as needed
+                solrQuery.setParam("hl.fl", "content_t");
+                solrQuery.setParam("hl.requireFieldMatch", "true");
+            }
         }
+
+        solrQuery.setQuery(query);
 
         solrQuery.setRows(15);
         String urlString = "http://localhost:8983/solr/aueb_archive";
         SolrClient server = new HttpSolrClient.Builder(urlString).build();
-        //SolrClient server = new HttpSolrClient(urlString);
         QueryResponse response = null;
         try {
             response = server.query(solrQuery);
@@ -87,12 +90,15 @@ public class ArchiveQueryService {
         while (iter.hasNext()) {
             SolrDocument doc = iter.next();
             String url = doc.get("url_s").toString();
-            //String dateRaw = doc.get("date_dt").toString();
             Date dDate = (Date) doc.get("date_dt");
             String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(dDate);
-            //LocalDate date = LocalDate.parse(dateRaw);
             String title = doc.get("title_t").toString();
-            String content = doc.get("content_t").toString();
+            String content;
+            if (input.contains("http") || input.contains("www")){
+                content = doc.get("content_t").toString();
+            }else{
+                content = response.getHighlighting().get(doc.get("id").toString()).get("content_t").get(0);
+            }
             responseWrapper.add(new ArchiveUrl( url,  date,  title,  content));
         }
         Gson gson = new Gson();
@@ -107,6 +113,12 @@ public class ArchiveQueryService {
 
         String query_1 = queryBuilder(keywords, "content_t");
         query = query_0 + " OR (" + query_1+")^10"+" AND date_dt:"+dateRange;
+        return query;
+    }
+
+    private static String getUrlQuery(String url, String dateRange) {
+        String query = "url_s:" + url.replace(":", "\\:");
+        query += " AND date_dt:"+dateRange;
         return query;
     }
 
