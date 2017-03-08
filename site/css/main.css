@@ -325,6 +325,16 @@ hgroup h2.lead {
     background-color: #b3d4fc;
 }
 
+
+.btn.btn-default > span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.glyphicon-time {
+    text-align: left;
+}
+
 /* ==========================================================================
    EXAMPLE Media Queries for Responsive Design.
    These examples override the primary ('mobile first') styles.
