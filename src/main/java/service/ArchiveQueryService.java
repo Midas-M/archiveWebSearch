@@ -70,7 +70,7 @@ public class ArchiveQueryService {
 
         solrQuery.setQuery(query);
 
-        solrQuery.setRows(15);
+        solrQuery.setRows(150);
         String urlString = "http://localhost:8983/solr/aueb_archive";
         SolrClient server = new HttpSolrClient.Builder(urlString).build();
         QueryResponse response = null;
@@ -94,10 +94,10 @@ public class ArchiveQueryService {
             String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(dDate);
             String title = doc.get("title_t").toString();
             String content;
-            if (input.contains("http") || input.contains("www")){
-                content = doc.get("content_t").toString();
-            }else{
+            try{
                 content = response.getHighlighting().get(doc.get("id").toString()).get("content_t").get(0);
+            } catch (NullPointerException e){
+                content = doc.get("content_t").toString();
             }
             responseWrapper.add(new ArchiveUrl( url,  date,  title,  content));
         }
