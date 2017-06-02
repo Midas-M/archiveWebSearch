@@ -2,9 +2,9 @@
  * @author antska
  */
 
-var api_url = 'http://83.212.204.92:8080/archive-1.0-SNAPSHOT/search';
-// var api_url = 'http://83.212.204.92:8080/search';
-var wayback_url = 'http://83.212.204.92:8080/wayback/';
+//var api_url = 'http://83.212.204.92:8080/archive-1.0-SNAPSHOT/search';
+var api_url = 'http://83.212.204.92/search';
+var wayback_url = 'http://83.212.204.92/wayback/';
 var groupedData_mapped;
 var groupedData_keys = {};
 
