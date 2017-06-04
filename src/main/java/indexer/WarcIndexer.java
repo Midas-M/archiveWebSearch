@@ -20,7 +20,7 @@ public class WarcIndexer {
 		List<File> files = null;
 		long startTime = System.currentTimeMillis();
 
-		String warcFilePath = "/mnt/virtual_data/IMPORT_WARCS/";
+		String warcFilePath = "/mnt/virtual_data/WARCS/";
 		// String warcFilePath = "/Users/antska/Git/archive_aueb/warcs";
 		File warcFile = new File(warcFilePath);
 		IOFileFilter suffixFileFilter = FileFilterUtils.suffixFileFilter ("warc.gz");
